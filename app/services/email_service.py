@@ -1,12 +1,15 @@
 import os
 import resend
+from dotenv import load_dotenv
 
-resend.api_key = os.environ["RESEND_API_KEY"]
+load_dotenv()
+
+resend.api_key = os.getenv("api_resend")
 
 def enviar_email_passaporte(nome: str, email: str, id_public: str) -> bool:
     try:
         resend.Emails.send({
-            "from": "Exagerado <passaporte@SEUDOMINIO.com>",
+            "from": "Exagerado <onboarding@resend.dev>",
             "to": email,
             "subject": "Seu Passaporte Exagerado",
             "html": f"""

@@ -36,6 +36,12 @@ class DatabaseManager:
             resultado = conn.execute(query, {"numero_cel": numero_cel}).mappings().fetchone()
         return dict(resultado) if resultado else None
 
+    def buscar_por_email(self, email: str) -> dict | None:
+        query = text("SELECT * FROM users WHERE email = :email")
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"email": email}).mappings().fetchone()
+        return dict(resultado) if resultado else None
+
     def inserir_usuario(self, nome: str, numero_cel: str, email: str, id_public: str) -> dict | None:
         query = text("""
             INSERT INTO users (nome, numero_cel, email, id_public)

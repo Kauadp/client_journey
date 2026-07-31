@@ -5,3 +5,5 @@ python-dotenv
 psycopg2
 fastapi
 resend
+jinja2
+python-multipart
