@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS interacoes_hub_juquita (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
     composicao VARCHAR(50) NOT NULL,
-    intencao_compra VARCHAR(50) NOT NULL,
+    faixa_etaria VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -35,6 +35,6 @@ CREATE TABLE IF NOT EXISTS interacoes_lounge_vip (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
     perfil_consumo VARCHAR(50) NOT NULL,
-    preferencia_marcas VARCHAR(50) NOT NULL,
+    intencao_compra VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

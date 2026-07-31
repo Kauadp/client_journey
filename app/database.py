@@ -86,18 +86,18 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar pontuação: {e}")
             return "erro"
 
-    def registrar_hub_juquita(self, visitante_id: int, composicao: str, intencao_compra: str) -> str:
+    def registrar_hub_juquita(self, visitante_id: int, composicao: str, faixa_etaria: str) -> str:
         """Retorna 'ok', 'duplicado' ou 'erro'."""
         query = text("""
-            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, intencao_compra)
-            VALUES (:visitante_id, :composicao, :intencao_compra)
+            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, faixa_etaria)
+            VALUES (:visitante_id, :composicao, :faixa_etaria)
         """)
         try:
             with self.engine.begin() as conn:
                 conn.execute(query, {
                     "visitante_id": visitante_id,
                     "composicao": composicao,
-                    "intencao_compra": intencao_compra,
+                    "faixa_etaria": faixa_etaria,
                 })
             logger.info(f"Hub Juquita registrado para visitante {visitante_id}.")
             return "ok"
@@ -108,18 +108,18 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar Hub Juquita: {e}")
             return "erro"
 
-    def registrar_vip_lounge(self, visitante_id: int, perfil_consumo: str, preferencia_marcas: str) -> str:
+    def registrar_vip_lounge(self, visitante_id: int, perfil_consumo: str, intencao_compra: str) -> str:
             """Retorna 'ok', 'duplicado' ou 'erro'."""
             query = text("""
-                INSERT INTO interacoes_lounge_vip (visitante_id, perfil_consumo, preferencia_marcas)
-                VALUES (:visitante_id, :perfil_consumo, :preferencia_marcas)
+                INSERT INTO interacoes_lounge_vip (visitante_id, perfil_consumo, intencao_compra)
+                VALUES (:visitante_id, :perfil_consumo, :intencao_compra)
             """)
             try:
                 with self.engine.begin() as conn:
                     conn.execute(query, {
                         "visitante_id": visitante_id,
                         "perfil_consumo": perfil_consumo,
-                        "preferencia_marcas": preferencia_marcas,
+                        "intencao_compra": intencao_compra,
                     })
                 logger.info(f"Vip Lounge registrado para visitante {visitante_id}.")
                 return "ok"

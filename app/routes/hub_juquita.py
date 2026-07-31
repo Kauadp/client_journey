@@ -18,7 +18,7 @@ def submit_hub_juquita(
     request: Request,
     id_public: str = Form(...),
     composicao: str = Form(...),
-    intencao_compra: str = Form(...),
+    faixa_etaria: str = Form(...),
 ):
     visitante = db.buscar_por_id_public(id_public.strip().upper())
 
@@ -31,7 +31,7 @@ def submit_hub_juquita(
     resultado = db.registrar_hub_juquita(
         visitante_id=visitante["id"],
         composicao=composicao,
-        intencao_compra=intencao_compra,
+        faixa_etaria=faixa_etaria,
     )
 
     if resultado == "ok":
