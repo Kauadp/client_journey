@@ -4,15 +4,11 @@
 
 {% block content %}
 <h4 class="mb-3">Prontinho, {{ nome }}! ✅</h4>
-<p>Esse é o seu código do Passaporte Exagerado — guarda esse QR no celular, ele vai ser usado nas lojas e nas ativações do evento.</p>
+<p>Esse é o seu código do Passaporte Exagerado — guarda ele, você vai precisar informar nas lojas e ativações do evento.</p>
 
-<div class="text-center my-4">
-    <img
-        src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ id_public }}"
-        alt="QR Code do seu Passaporte"
-        class="img-fluid"
-    >
-    <p class="fs-4 fw-bold mt-2">{{ id_public }}</p>
+<div class="text-center my-4 p-3 bg-light rounded">
+    <p class="text-muted small mb-1">Seu código</p>
+    <p class="display-5 fw-bold letter-spacing-1 mb-0">{{ id_public }}</p>
 </div>
 
 <p class="text-muted small">Também mandamos esse código pro seu e-mail, caso precise consultar depois.</p>

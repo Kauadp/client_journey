@@ -1,8 +1,7 @@
 import logging
 import pandas as pd
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.types import DateTime, Float, String
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 import os
 from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +54,81 @@ class DatabaseManager:
             logger.error(f"Erro ao inserir usuário: {e}")
             return None
 
+    def buscar_por_id_public(self, id_public: str) -> dict | None:
+        query = text("SELECT * FROM users WHERE id_public = :id_public")
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"id_public": id_public}).mappings().fetchone()
+        return dict(resultado) if resultado else None
+
+
+    def buscar_loja(self, loja_id: int) -> dict | None:
+        query = text("SELECT * FROM lojas WHERE id = :loja_id")
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"loja_id": loja_id}).mappings().fetchone()
+        return dict(resultado) if resultado else None
+
+
+    def registrar_pontuacao(self, visitante_id: int, loja_id: int, pontos: int) -> str:
+        """Retorna 'ok', 'duplicado' ou 'erro' — pra rota decidir qual tela mostrar."""
+        query = text("""
+            INSERT INTO pontuacoes (visitante_id, loja_id, pontos)
+            VALUES (:visitante_id, :loja_id, :pontos)
+        """)
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(query, {"visitante_id": visitante_id, "loja_id": loja_id, "pontos": pontos})
+            logger.info(f"Pontuação registrada: visitante {visitante_id} na loja {loja_id}.")
+            return "ok"
+        except IntegrityError:
+            logger.warning(f"Tentativa de pontuação duplicada: visitante {visitante_id} na loja {loja_id}.")
+            return "duplicado"
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao registrar pontuação: {e}")
+            return "erro"
+
+    def registrar_hub_juquita(self, visitante_id: int, composicao: str, intencao_compra: str) -> str:
+        """Retorna 'ok', 'duplicado' ou 'erro'."""
+        query = text("""
+            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, intencao_compra)
+            VALUES (:visitante_id, :composicao, :intencao_compra)
+        """)
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(query, {
+                    "visitante_id": visitante_id,
+                    "composicao": composicao,
+                    "intencao_compra": intencao_compra,
+                })
+            logger.info(f"Hub Juquita registrado para visitante {visitante_id}.")
+            return "ok"
+        except IntegrityError:
+            logger.warning(f"Visitante {visitante_id} já respondeu o Hub Juquita.")
+            return "duplicado"
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao registrar Hub Juquita: {e}")
+            return "erro"
+
+    def registrar_vip_lounge(self, visitante_id: int, perfil_consumo: str, preferencia_marcas: str) -> str:
+            """Retorna 'ok', 'duplicado' ou 'erro'."""
+            query = text("""
+                INSERT INTO interacoes_lounge_vip (visitante_id, perfil_consumo, preferencia_marcas)
+                VALUES (:visitante_id, :perfil_consumo, :preferencia_marcas)
+            """)
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(query, {
+                        "visitante_id": visitante_id,
+                        "perfil_consumo": perfil_consumo,
+                        "preferencia_marcas": preferencia_marcas,
+                    })
+                logger.info(f"Vip Lounge registrado para visitante {visitante_id}.")
+                return "ok"
+            except IntegrityError:
+                logger.warning(f"Visitante {visitante_id} já respondeu o Vip Lounge.")
+                return "duplicado"
+            except SQLAlchemyError as e:
+                logger.error(f"Erro ao registrar Vip Lounge: {e}")
+                return "erro"
 
 load_dotenv()
 db = DatabaseManager(connection_string=os.getenv("db_uri"))
