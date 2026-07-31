@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS interacoes_hub_juquita (
     visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
     composicao VARCHAR(50) NOT NULL,
     faixa_etaria VARCHAR(50) NOT NULL,
+    local_origem VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

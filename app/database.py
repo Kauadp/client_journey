@@ -92,11 +92,11 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar pontuação: {e}")
             return "erro"
 
-    def registrar_hub_juquita(self, visitante_id: int, composicao: str, faixa_etaria: str) -> str:
+    def registrar_hub_juquita(self, visitante_id: int, composicao: str, faixa_etaria: str, local_origem: str) -> str:
         """Retorna 'ok', 'duplicado' ou 'erro'."""
         query = text("""
-            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, faixa_etaria)
-            VALUES (:visitante_id, :composicao, :faixa_etaria)
+            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, faixa_etaria, local_origem)
+            VALUES (:visitante_id, :composicao, :faixa_etaria, :local_origem)
         """)
         try:
             with self.engine.begin() as conn:
@@ -104,6 +104,7 @@ class DatabaseManager:
                     "visitante_id": visitante_id,
                     "composicao": composicao,
                     "faixa_etaria": faixa_etaria,
+                    "local_origem": local_origem
                 })
             logger.info(f"Hub Juquita registrado para visitante {visitante_id}.")
             return "ok"

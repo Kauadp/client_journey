@@ -19,6 +19,7 @@ def submit_hub_juquita(
     id_public: str = Form(...),
     composicao: str = Form(...),
     faixa_etaria: str = Form(...),
+    local_origem: str = Form(...),
 ):
     visitante = db.buscar_por_id_public(id_public.strip().upper())
 
@@ -32,6 +33,7 @@ def submit_hub_juquita(
         visitante_id=visitante["id"],
         composicao=composicao,
         faixa_etaria=faixa_etaria,
+        local_origem=local_origem,
     )
 
     if resultado == "ok":
