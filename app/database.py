@@ -67,12 +67,36 @@ class DatabaseManager:
         return dict(resultado) if resultado else None
 
 
-    def buscar_loja(self, loja_id: int) -> dict | None:
-        query = text("SELECT * FROM lojas WHERE id = :loja_id")
+    def buscar_loja_por_codigo(self, codigo_publico: str) -> dict | None:
+        query = text("SELECT * FROM lojas WHERE codigo_publico = :codigo_publico")
         with self.engine.connect() as conn:
-            resultado = conn.execute(query, {"loja_id": loja_id}).mappings().fetchone()
+            resultado = conn.execute(query, {"codigo_publico": codigo_publico}).mappings().fetchone()
         return dict(resultado) if resultado else None
 
+    
+    def codigo_loja_existe(self, codigo: str) -> bool:
+        query = text("SELECT 1 FROM lojas WHERE codigo_publico = :codigo")
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"codigo": codigo}).fetchone()
+        return resultado is not None
+
+    def inserir_loja(self, codigo_publico: str, nome: str, pontos_base: int) -> dict | None:
+        query = text("""
+            INSERT INTO lojas (codigo_publico, nome, pontos_base)
+            VALUES (:codigo_publico, :nome, :pontos_base)
+            RETURNING *
+        """)
+        try:
+            with self.engine.begin() as conn:
+                resultado = conn.execute(
+                    query,
+                    {"codigo_publico": codigo_publico, "nome": nome, "pontos_base": pontos_base},
+                ).mappings().fetchone()
+            logger.info(f"Loja {nome} inserida com sucesso.")
+            return dict(resultado)
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao inserir loja: {e}")
+            return None
 
     def registrar_pontuacao(self, visitante_id: int, loja_id: int, pontos: int) -> str:
         """Retorna 'ok', 'duplicado' ou 'erro' — pra rota decidir qual tela mostrar."""

@@ -8,23 +8,21 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
-@router.get("/loja/{loja_id}", response_class=HTMLResponse)
-def form_loja(loja_id: int, request: Request):
-    loja = db.buscar_loja(loja_id)
-
+@router.get("/loja/{codigo_publico}", response_class=HTMLResponse)
+def form_loja(codigo_publico: str, request: Request):
+    loja = db.buscar_loja_por_codigo(codigo_publico)
     if loja is None:
         return templates.TemplateResponse(
             request, "resultado_loja.html",
-            {"sucesso": False, "mensagem": "Loja não encontrada."},
+            {"sucesso": False, "ja_pontuou": False, "mensagem": "Loja não encontrada."},
             status_code=404,
         )
-
     return templates.TemplateResponse(request, "loja.html", {"loja": loja})
 
 
-@router.post("/loja/{loja_id}", response_class=HTMLResponse)
-def submit_loja(loja_id: int, request: Request, id_public: str = Form(...)):
-    loja = db.buscar_loja(loja_id)
+@router.post("/loja/{codigo_publico}", response_class=HTMLResponse)
+def submit_loja(codigo_publico: str, request: Request, id_public: str = Form(...)):
+    loja = db.buscar_loja_por_codigo(codigo_publico)
     if loja is None:
         return templates.TemplateResponse(
             request, "resultado_loja.html",
@@ -41,7 +39,7 @@ def submit_loja(loja_id: int, request: Request, id_public: str = Form(...)):
 
     resultado = db.registrar_pontuacao(
         visitante_id=visitante["id"],
-        loja_id=loja_id,
+        loja_id=loja["id"],
         pontos=loja["pontos_base"],
     )
 
