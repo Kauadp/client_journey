@@ -99,3 +99,11 @@ CREATE TABLE IF NOT EXISTS interacoes_saida_juquita (
     com_quem_veio VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS interacoes_dentro_lojas (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
+    melhor_dia VARCHAR(50) NOT NULL,
+    forma_pagamento VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

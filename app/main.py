@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import entrada_juquita, visitante, loja, vip_lounge, admin, usuario_pontuacao, auth, acao_guerrilha, boas_vindas, estacionamento, cenografia, saida_juquita
+from app.routes import entrada_juquita, visitante, loja, vip_lounge, admin, usuario_pontuacao, auth, acao_guerrilha, boas_vindas, estacionamento, cenografia, saida_juquita, dentro_lojas
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
@@ -22,3 +22,4 @@ app.include_router(boas_vindas.router)
 app.include_router(estacionamento.router)
 app.include_router(cenografia.router)
 app.include_router(saida_juquita.router)
+app.include_router(dentro_lojas.router)

@@ -281,6 +281,28 @@ class DatabaseManager:
                 logger.error(f"Erro ao registrar Saída Juquita: {e}")
                 return "erro"
 
+    def registrar_dentro_lojas(self, visitante_id: int, melhor_dia: str, forma_pagamento: str) -> str:
+                """Retorna 'ok', 'duplicado' ou 'erro'."""
+                query = text("""
+                    INSERT INTO interacoes_dentro_lojas (visitante_id, melhor_dia, forma_pagamento)
+                    VALUES (:visitante_id, :melhor_dia, :forma_pagamento)
+                """)
+                try:
+                    with self.engine.begin() as conn:
+                        conn.execute(query, {
+                            "visitante_id": visitante_id,
+                            "melhor_dia": melhor_dia,
+                            "forma_pagamento": forma_pagamento
+                        })
+                    logger.info(f"Lojas registrado para visitante {visitante_id}.")
+                    return "ok"
+                except IntegrityError:
+                    logger.warning(f"Visitante {visitante_id} já respondeu à Lojas.")
+                    return "duplicado"
+                except SQLAlchemyError as e:
+                    logger.error(f"Erro ao registrar Lojas: {e}")
+                    return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT
