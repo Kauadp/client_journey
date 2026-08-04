@@ -169,6 +169,28 @@ class DatabaseManager:
                 logger.error(f"Erro ao registrar Vip Lounge: {e}")
                 return "erro"
 
+    def registrar_acao_guerrilha(self, visitante_id: int, oque_trouxe: str, regiao: str) -> str:
+        """Retorna 'ok', 'duplicado' ou 'erro'."""
+        query = text("""
+            INSERT INTO interacoes_acao_guerrilha (visitante_id, oque_trouxe, regiao)
+            VALUES (:visitante_id, :oque_trouxe, :regiao)
+        """)
+        try:
+            with self.engine.begin() as conn:
+                conn.execute(query, {
+                    "visitante_id": visitante_id,
+                    "oque_trouxe": oque_trouxe,
+                    "regiao": regiao
+                })
+            logger.info(f"Ação Guerrilha registrada para visitante {visitante_id}.")
+            return "ok"
+        except IntegrityError:
+            logger.warning(f"Visitante {visitante_id} já respondeu a Ação Guerrilha.")
+            return "duplicado"
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao registrar Ação Guerrilha: {e}")
+            return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT
