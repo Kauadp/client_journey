@@ -1,18 +1,17 @@
 import os
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.database import db
 from app.services.public_code import gerar_public_code_unico
-
+from app.dependencies import verificar_admin
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 BASE_URL = os.environ["base_url"]
 
-
-@router.get("/admin/lojas/nova", response_class=HTMLResponse)
+@router.get("/admin/lojas/nova", dependencies=[Depends(verificar_admin)])
 def form_nova_loja(request: Request):
     return templates.TemplateResponse(request, "admin_nova_loja.html", {})
 
