@@ -258,6 +258,29 @@ class DatabaseManager:
                         logger.error(f"Erro ao registrar Cenografia: {e}")
                         return "erro"
 
+    def registrar_saida_juquita(self, visitante_id: int, qual_renda: str, quanto_pretende_gastar: str, com_quem_veio: str) -> str:
+            """Retorna 'ok', 'duplicado' ou 'erro'."""
+            query = text("""
+                INSERT INTO interacoes_saida_juquita (visitante_id, qual_renda, quanto_pretende_gastar, com_quem_veio)
+                VALUES (:visitante_id, :qual_renda, :quanto_pretende_gastar, :com_quem_veio)
+            """)
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(query, {
+                        "visitante_id": visitante_id,
+                        "qual_renda": qual_renda,
+                        "quanto_pretende_gastar": quanto_pretende_gastar,
+                        "com_quem_veio": com_quem_veio
+                    })
+                logger.info(f"Saída Juquita registrado para visitante {visitante_id}.")
+                return "ok"
+            except IntegrityError:
+                logger.warning(f"Visitante {visitante_id} já respondeu à Saída Juquita.")
+                return "duplicado"
+            except SQLAlchemyError as e:
+                logger.error(f"Erro ao registrar Saída Juquita: {e}")
+                return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT

@@ -90,3 +90,12 @@ CREATE TABLE IF NOT EXISTS interacoes_cenografia (
     qual_marca_deixou_louco VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS interacoes_saida_juquita (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
+    qual_renda VARCHAR(50) NOT NULL,
+    quanto_pretende_gastar VARCHAR(50) NOT NULL,
+    com_quem_veio VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
