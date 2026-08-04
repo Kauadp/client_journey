@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Seus pontos{% endblock %}
+
+{% block content %}
+{% if sucesso and usuario %}
+<h4 class="mb-3">👤 {{ usuario.usuario_nome }}</h4>
+
+<div class="text-center my-4 p-3 bg-light rounded">
+    <p class="text-muted small mb-1">Total de pontos</p>
+    <p class="display-5 fw-bold mb-0">{{ usuario.total_geral_pontos }}</p>
+</div>
+
+{% if usuario.lojas %}
+<h6 class="fw-bold mb-2">Pontos por loja</h6>
+<ul class="list-group mb-3">
+    {% for item in usuario.lojas %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ item.loja }}
+        <span class="fw-bold">{{ item.pontos }} pts</span>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="text-muted text-center">Nenhum ponto registrado em loja ainda.</p>
+{% endif %}
+
+<a href="/usuario-pontuacao" class="btn btn-outline-primary w-100">Nova consulta</a>
+
+{% else %}
+<h4 class="mb-3">⚠️ Ops</h4>
+<p class="text-muted">{{ mensagem }}</p>
+<a href="/usuario-pontuacao" class="btn btn-outline-primary w-100">Tentar novamente</a>
+{% endif %}
+{% endblock %}

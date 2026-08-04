@@ -161,5 +161,41 @@ class DatabaseManager:
                 logger.error(f"Erro ao registrar Vip Lounge: {e}")
                 return "erro"
 
+    def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict:
+        query = text("""
+            SELECT 
+                users.id,
+                users.nome AS usuario_nome,
+                lojas.nome AS loja_nome,
+                SUM(pontuacoes.pontos) AS total_pontos_loja
+            FROM users
+            LEFT JOIN pontuacoes 
+                ON users.id = pontuacoes.visitante_id
+            LEFT JOIN lojas 
+                ON pontuacoes.loja_id = lojas.id
+            WHERE users.id_public = :id_public
+            GROUP BY users.id, users.nome, lojas.id, lojas.nome
+        """)
+        
+        with self.engine.connect() as conn:
+            resultados = conn.execute(query, {"id_public": id_public}).mappings().fetchall()
+        
+        if not resultados:
+            return None
+
+        linhas = [dict(row) for row in resultados]
+        
+        total_geral = sum(row["total_pontos_loja"] or 0 for row in linhas)
+        
+        return {
+            "usuario_id": linhas[0]["id"],
+            "usuario_nome": linhas[0]["usuario_nome"],
+            "total_geral_pontos": total_geral,
+            "lojas": [
+                {"loja": row["loja_nome"], "pontos": row["total_pontos_loja"]} 
+                for row in linhas if row["loja_nome"] is not None
+            ]
+        }
+
 load_dotenv()
 db = DatabaseManager(connection_string=os.getenv("db_uri"))

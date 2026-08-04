@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routes import visitante, loja, hub_juquita, vip_lounge, admin
+from app.routes import visitante, loja, hub_juquita, vip_lounge, admin, usuario_pontuacao
 
 app = FastAPI(title="Ecossistema de Dados Exagerado")
 
@@ -8,3 +8,4 @@ app.include_router(loja.router)
 app.include_router(hub_juquita.router)
 app.include_router(vip_lounge.router)
 app.include_router(admin.router)
+app.include_router(usuario_pontuacao.router)
