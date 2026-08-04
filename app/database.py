@@ -197,5 +197,23 @@ class DatabaseManager:
             ]
         }
 
+    def inserir_brinde(self, nome: str, custo_pontos: int, estoque: int) -> dict | None:
+        query = text("""
+            INSERT INTO brindes (nome, custo_pontos, estoque)
+            VALUES (:nome, :custo_pontos, :estoque)
+            RETURNING *
+        """)
+        try:
+            with self.engine.begin() as conn:
+                resultado = conn.execute(query, {
+                    "nome": nome,
+                    "custo_pontos": custo_pontos,
+                    "estoque": estoque,
+                }).mappings().fetchone()
+            return dict(resultado)
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao inserir brinde: {e}")
+            return None
+
 load_dotenv()
 db = DatabaseManager(connection_string=os.getenv("db_uri"))

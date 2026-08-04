@@ -38,3 +38,29 @@ def submit_nova_loja(
         request, "admin_resultado_loja.html",
         {"sucesso": True, "loja": loja, "url_loja": url_loja},
     )
+
+@router.get("/admin/brindes/nova", response_class=HTMLResponse, dependencies=[Depends(verificar_admin)])
+def form_novo_brinde(request: Request):
+    return templates.TemplateResponse(request, "admin_novo_brinde.html", {})
+
+
+@router.post("/admin/brindes/nova", response_class=HTMLResponse, dependencies=[Depends(verificar_admin)])
+def submit_novo_brinde(
+    request: Request,
+    nome: str = Form(...),
+    custo_pontos: int = Form(...),
+    estoque: int = Form(...),
+):
+    brinde = db.inserir_brinde(nome=nome, custo_pontos=custo_pontos, estoque=estoque)
+
+    if brinde is None:
+        return templates.TemplateResponse(
+            request, "admin_resultado_brinde.html",
+            {"sucesso": False, "mensagem": "Erro ao cadastrar o brinde. Tenta de novo."},
+            status_code=500,
+        )
+
+    return templates.TemplateResponse(
+        request, "admin_resultado_brinde.html",
+        {"sucesso": True, "brinde": brinde},
+    )
