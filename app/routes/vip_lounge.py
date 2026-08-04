@@ -17,8 +17,8 @@ def form_vip_lounge(request: Request):
 def submit_vip_lounge(
     request: Request,
     id_public: str = Form(...),
-    perfil_consumo: str = Form(...),
-    intencao_compra: str = Form(...),
+    prioridade: str = Form(...),
+    quantas_sacolas: str = Form(...),
 ):
     visitante = db.buscar_por_id_public(id_public.strip().upper())
 
@@ -30,8 +30,8 @@ def submit_vip_lounge(
 
     resultado = db.registrar_vip_lounge(
         visitante_id=visitante["id"],
-        perfil_consumo=perfil_consumo,
-        intencao_compra=intencao_compra,
+        prioridade=prioridade,
+        quantas_sacolas=quantas_sacolas,
     )
 
     if resultado == "ok":

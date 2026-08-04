@@ -147,18 +147,18 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar Entrada Juquita: {e}")
             return "erro"
 
-    def registrar_vip_lounge(self, visitante_id: int, perfil_consumo: str, intencao_compra: str) -> str:
+    def registrar_vip_lounge(self, visitante_id: int, prioridade: str, quantas_sacolas: str) -> str:
             """Retorna 'ok', 'duplicado' ou 'erro'."""
             query = text("""
-                INSERT INTO interacoes_lounge_vip (visitante_id, perfil_consumo, intencao_compra)
-                VALUES (:visitante_id, :perfil_consumo, :intencao_compra)
+                INSERT INTO interacoes_lounge_vip (visitante_id, prioridade, quantas_sacolas)
+                VALUES (:visitante_id, :prioridade, :quantas_sacolas)
             """)
             try:
                 with self.engine.begin() as conn:
                     conn.execute(query, {
                         "visitante_id": visitante_id,
-                        "perfil_consumo": perfil_consumo,
-                        "intencao_compra": intencao_compra,
+                        "prioridade": prioridade,
+                        "quantas_sacolas": quantas_sacolas,
                     })
                 logger.info(f"Vip Lounge registrado para visitante {visitante_id}.")
                 return "ok"
