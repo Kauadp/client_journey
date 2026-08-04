@@ -191,6 +191,29 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar Ação Guerrilha: {e}")
             return "erro"
 
+    def registrar_boas_vindas(self, visitante_id: int, quem_eh_voce: str, qual_foco: str, regiao: str) -> str:
+            """Retorna 'ok', 'duplicado' ou 'erro'."""
+            query = text("""
+                INSERT INTO interacoes_boas_vindas (visitante_id, quem_eh_voce, qual_foco, regiao)
+                VALUES (:visitante_id, :quem_eh_voce, :qual_foco, :regiao)
+            """)
+            try:
+                with self.engine.begin() as conn:
+                    conn.execute(query, {
+                        "visitante_id": visitante_id,
+                        "quem_eh_voce": quem_eh_voce,
+                        "qual_foco": qual_foco,
+                        "regiao": regiao
+                    })
+                logger.info(f"Boas Vindas registrada para visitante {visitante_id}.")
+                return "ok"
+            except IntegrityError:
+                logger.warning(f"Visitante {visitante_id} já respondeu às Boas Vindas.")
+                return "duplicado"
+            except SQLAlchemyError as e:
+                logger.error(f"Erro ao registrar Boas Vindas: {e}")
+                return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT
