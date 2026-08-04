@@ -214,6 +214,28 @@ class DatabaseManager:
                 logger.error(f"Erro ao registrar Boas Vindas: {e}")
                 return "erro"
 
+    def registrar_estacionamento(self, visitante_id: int, como_veio: str, quanto_tempo: str) -> str:
+                """Retorna 'ok', 'duplicado' ou 'erro'."""
+                query = text("""
+                    INSERT INTO interacoes_estacionamento (visitante_id, como_veio, quanto_tempo)
+                    VALUES (:visitante_id, :como_veio, :quanto_tempo)
+                """)
+                try:
+                    with self.engine.begin() as conn:
+                        conn.execute(query, {
+                            "visitante_id": visitante_id,
+                            "como_veio": como_veio,
+                            "quanto_tempo": quanto_tempo
+                        })
+                    logger.info(f"Estacionamento registrada para visitante {visitante_id}.")
+                    return "ok"
+                except IntegrityError:
+                    logger.warning(f"Visitante {visitante_id} já respondeu ao Estacionamento.")
+                    return "duplicado"
+                except SQLAlchemyError as e:
+                    logger.error(f"Erro ao registrar Estacionamento: {e}")
+                    return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT
