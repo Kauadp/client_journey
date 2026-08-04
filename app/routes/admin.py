@@ -16,7 +16,7 @@ def form_nova_loja(request: Request):
     return templates.TemplateResponse(request, "admin_nova_loja.html", {})
 
 
-@router.post("/admin/lojas/nova", response_class=HTMLResponse)
+@router.post("/admin/lojas/nova", response_class=HTMLResponse, dependencies=[Depends(verificar_admin)])
 def submit_nova_loja(
     request: Request,
     nome: str = Form(...),
@@ -63,4 +63,44 @@ def submit_novo_brinde(
     return templates.TemplateResponse(
         request, "admin_resultado_brinde.html",
         {"sucesso": True, "brinde": brinde},
+    )
+
+@router.get("/admin/resgate", response_class=HTMLResponse, dependencies=[Depends(verificar_admin)])
+def form_resgate(request: Request):
+    brindes = db.buscar_brindes_disponiveis()
+    return templates.TemplateResponse(request, "admin_resgate.html", {"brindes": brindes})
+
+
+@router.post("/admin/resgate", response_class=HTMLResponse, dependencies=[Depends(verificar_admin)])
+def submit_resgate(request: Request, id_public: str = Form(...), brinde_id: int = Form(...)):
+    visitante = db.buscar_por_id_public(id_public.strip().upper())
+    if visitante is None:
+        return templates.TemplateResponse(
+            request, "admin_resultado_resgate.html",
+            {"sucesso": False, "mensagem": "Código não encontrado."},
+        )
+
+    brinde = db.buscar_brinde(brinde_id)
+    if brinde is None:
+        return templates.TemplateResponse(
+            request, "admin_resultado_resgate.html",
+            {"sucesso": False, "mensagem": "Brinde não encontrado."},
+        )
+
+    resultado = db.resgatar_brinde(
+        visitante_id=visitante["id"],
+        brinde_id=brinde_id,
+        custo_pontos=brinde["custo_pontos"],
+    )
+
+    mensagens = {
+        "ok": f"✅ {visitante['nome']} resgatou: {brinde['nome']}!",
+        "saldo_insuficiente": f"{visitante['nome']} não tem pontos suficientes pra esse brinde.",
+        "sem_estoque": f"{brinde['nome']} está sem estoque.",
+        "erro": "Erro ao processar o resgate. Tenta de novo.",
+    }
+
+    return templates.TemplateResponse(
+        request, "admin_resultado_resgate.html",
+        {"sucesso": resultado == "ok", "mensagem": mensagens[resultado]},
     )

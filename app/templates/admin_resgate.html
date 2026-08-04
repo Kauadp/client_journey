@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Resgatar brinde{% endblock %}
+{% block content %}
+<a href="/admin" class="text-decoration-none text-muted small">← Voltar ao hub</a>
+<h4 class="mb-3">Resgatar brinde</h4>
+<form method="post" action="/admin/resgate">
+    <div class="mb-3">
+        <label class="form-label">Código do cliente</label>
+        <input type="text" class="form-control text-uppercase" name="id_public" required autofocus>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Brinde</label>
+        <select class="form-select" name="brinde_id" required>
+            <option value="" disabled selected>Escolhe um brinde</option>
+            {% for brinde in brindes %}
+            <option value="{{ brinde.id }}">{{ brinde.nome }} — {{ brinde.custo_pontos }} pts (estoque: {{ brinde.estoque }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Resgatar</button>
+</form>
+{% endblock %}

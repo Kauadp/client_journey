@@ -7,6 +7,11 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DatabaseManager")
 
+class SaldoInsuficiente(Exception):
+    pass
+
+class SemEstoque(Exception):
+    pass
 
 class DatabaseManager:
 
@@ -99,14 +104,17 @@ class DatabaseManager:
             return None
 
     def registrar_pontuacao(self, visitante_id: int, loja_id: int, pontos: int) -> str:
-        """Retorna 'ok', 'duplicado' ou 'erro' — pra rota decidir qual tela mostrar."""
-        query = text("""
+        query_pontuacao = text("""
             INSERT INTO pontuacoes (visitante_id, loja_id, pontos)
             VALUES (:visitante_id, :loja_id, :pontos)
         """)
+        query_saldo = text("""
+            UPDATE users SET pontos_atuais = pontos_atuais + :pontos WHERE id = :visitante_id
+        """)
         try:
             with self.engine.begin() as conn:
-                conn.execute(query, {"visitante_id": visitante_id, "loja_id": loja_id, "pontos": pontos})
+                conn.execute(query_pontuacao, {"visitante_id": visitante_id, "loja_id": loja_id, "pontos": pontos})
+                conn.execute(query_saldo, {"visitante_id": visitante_id, "pontos": pontos})
             logger.info(f"Pontuação registrada: visitante {visitante_id} na loja {loja_id}.")
             return "ok"
         except IntegrityError:
@@ -161,40 +169,80 @@ class DatabaseManager:
                 logger.error(f"Erro ao registrar Vip Lounge: {e}")
                 return "erro"
 
-    def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict:
-        query = text("""
-            SELECT 
-                users.id,
-                users.nome AS usuario_nome,
-                lojas.nome AS loja_nome,
-                SUM(pontuacoes.pontos) AS total_pontos_loja
+    def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
+        query_usuario = text("""
+            SELECT
+                id,
+                nome,
+                pontos_atuais
             FROM users
-            LEFT JOIN pontuacoes 
-                ON users.id = pontuacoes.visitante_id
-            LEFT JOIN lojas 
-                ON pontuacoes.loja_id = lojas.id
-            WHERE users.id_public = :id_public
-            GROUP BY users.id, users.nome, lojas.id, lojas.nome
+            WHERE id_public = :id_public
         """)
-        
-        with self.engine.connect() as conn:
-            resultados = conn.execute(query, {"id_public": id_public}).mappings().fetchall()
-        
-        if not resultados:
-            return None
 
-        linhas = [dict(row) for row in resultados]
-        
-        total_geral = sum(row["total_pontos_loja"] or 0 for row in linhas)
-        
+        query_lojas = text("""
+            SELECT
+                l.nome AS loja_nome,
+                SUM(p.pontos) AS pontos
+            FROM pontuacoes p
+            JOIN lojas l
+                ON l.id = p.loja_id
+            JOIN users u
+                ON u.id = p.visitante_id
+            WHERE u.id_public = :id_public
+            GROUP BY l.id, l.nome
+            ORDER BY l.nome
+        """)
+
+        query_resgates = text("""
+            SELECT
+                b.nome AS brinde_nome,
+                r.pontos_debitados
+            FROM resgates r
+            JOIN brindes b
+                ON b.id = r.brinde_id
+            JOIN users u
+                ON u.id = r.visitante_id
+            WHERE u.id_public = :id_public
+            ORDER BY r.id DESC
+        """)
+
+        with self.engine.connect() as conn:
+            usuario = conn.execute(
+                query_usuario,
+                {"id_public": id_public}
+            ).mappings().fetchone()
+
+            if usuario is None:
+                return None
+
+            lojas = conn.execute(
+                query_lojas,
+                {"id_public": id_public}
+            ).mappings().fetchall()
+
+            resgates = conn.execute(
+                query_resgates,
+                {"id_public": id_public}
+            ).mappings().fetchall()
+
         return {
-            "usuario_id": linhas[0]["id"],
-            "usuario_nome": linhas[0]["usuario_nome"],
-            "total_geral_pontos": total_geral,
+            "usuario_id": usuario["id"],
+            "usuario_nome": usuario["nome"],
+            "pontos_atuais": usuario["pontos_atuais"],
             "lojas": [
-                {"loja": row["loja_nome"], "pontos": row["total_pontos_loja"]} 
-                for row in linhas if row["loja_nome"] is not None
-            ]
+                {
+                    "loja": loja["loja_nome"],
+                    "pontos": loja["pontos"],
+                }
+                for loja in lojas
+            ],
+            "resgates": [
+                {
+                    "brinde": resgate["brinde_nome"],
+                    "pontos": resgate["pontos_debitados"],
+                }
+                for resgate in resgates
+            ],
         }
 
     def inserir_brinde(self, nome: str, custo_pontos: int, estoque: int) -> dict | None:
@@ -214,6 +262,50 @@ class DatabaseManager:
         except SQLAlchemyError as e:
             logger.error(f"Erro ao inserir brinde: {e}")
             return None
+
+    def buscar_brindes_disponiveis(self) -> list[dict]:
+        query = text("SELECT * FROM brindes WHERE estoque > 0 ORDER BY custo_pontos")
+        with self.engine.connect() as conn:
+            resultados = conn.execute(query).mappings().fetchall()
+        return [dict(row) for row in resultados]
+
+    def buscar_brinde(self, brinde_id: int) -> dict | None:
+        query = text("SELECT * FROM brindes WHERE id = :id")
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"id": brinde_id}).mappings().fetchone()
+        return dict(resultado) if resultado else None
+
+    def resgatar_brinde(self, visitante_id: int, brinde_id: int, custo_pontos: int) -> str:
+        """Retorna 'ok', 'saldo_insuficiente', 'sem_estoque' ou 'erro'."""
+        query_debita_saldo = text("""
+            UPDATE users SET pontos_atuais = pontos_atuais - :custo
+            WHERE id = :visitante_id AND pontos_atuais >= :custo
+            RETURNING id
+        """)
+        query_debita_estoque = text("""
+            UPDATE brindes SET estoque = estoque - 1
+            WHERE id = :brinde_id AND estoque > 0
+            RETURNING id
+        """)
+        query_log = text("""
+            INSERT INTO resgates (visitante_id, brinde_id, pontos_debitados)
+            VALUES (:visitante_id, :brinde_id, :custo)
+        """)
+        try:
+            with self.engine.begin() as conn:
+                if conn.execute(query_debita_saldo, {"visitante_id": visitante_id, "custo": custo_pontos}).fetchone() is None:
+                    raise SaldoInsuficiente()
+                if conn.execute(query_debita_estoque, {"brinde_id": brinde_id}).fetchone() is None:
+                    raise SemEstoque()
+                conn.execute(query_log, {"visitante_id": visitante_id, "brinde_id": brinde_id, "custo": custo_pontos})
+            return "ok"
+        except SaldoInsuficiente:
+            return "saldo_insuficiente"
+        except SemEstoque:
+            return "sem_estoque"
+        except SQLAlchemyError as e:
+            logger.error(f"Erro ao resgatar brinde: {e}")
+            return "erro"
 
 load_dotenv()
 db = DatabaseManager(connection_string=os.getenv("db_uri"))

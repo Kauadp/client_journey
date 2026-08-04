@@ -12,8 +12,7 @@ templates = Jinja2Templates(directory="app/templates")
 load_dotenv()
 
 ADMIN_USER = os.getenv("admin_user")
-ADMIN_PASSWORD = os.getenv("admin_user")
-
+ADMIN_PASSWORD = os.getenv("admin_password")
 
 @router.get("/admin/login", response_class=HTMLResponse)
 def form_login(request: Request):
