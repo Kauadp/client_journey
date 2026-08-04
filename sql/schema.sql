@@ -82,3 +82,11 @@ CREATE TABLE IF NOT EXISTS interacoes_estacionamento (
     quanto_tempo VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS interacoes_cenografia (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
+    oque_mais_garimpou VARCHAR(50) NOT NULL,
+    qual_marca_deixou_louco VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

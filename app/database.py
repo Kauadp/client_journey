@@ -236,6 +236,28 @@ class DatabaseManager:
                     logger.error(f"Erro ao registrar Estacionamento: {e}")
                     return "erro"
 
+    def registrar_cenografia(self, visitante_id: int, oque_mais_garimpou: str, qual_marca_deixou_louco: str) -> str:
+                    """Retorna 'ok', 'duplicado' ou 'erro'."""
+                    query = text("""
+                        INSERT INTO interacoes_cenografia (visitante_id, oque_mais_garimpou, qual_marca_deixou_louco)
+                        VALUES (:visitante_id, :oque_mais_garimpou, :qual_marca_deixou_louco)
+                    """)
+                    try:
+                        with self.engine.begin() as conn:
+                            conn.execute(query, {
+                                "visitante_id": visitante_id,
+                                "oque_mais_garimpou": oque_mais_garimpou,
+                                "qual_marca_deixou_louco": qual_marca_deixou_louco
+                            })
+                        logger.info(f"Cenografia registrada para visitante {visitante_id}.")
+                        return "ok"
+                    except IntegrityError:
+                        logger.warning(f"Visitante {visitante_id} já respondeu ao Cenografia.")
+                        return "duplicado"
+                    except SQLAlchemyError as e:
+                        logger.error(f"Erro ao registrar Cenografia: {e}")
+                        return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT
