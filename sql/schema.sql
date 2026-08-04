@@ -25,12 +25,12 @@ CREATE TABLE IF NOT EXISTS pontuacoes (
     UNIQUE (visitante_id, loja_id)
 );
 
-CREATE TABLE IF NOT EXISTS interacoes_hub_juquita (
+CREATE TABLE IF NOT EXISTS interacoes_entrada_juquita (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
-    composicao VARCHAR(50) NOT NULL,
+    item_ritmo VARCHAR(50) NOT NULL,
     faixa_etaria VARCHAR(50) NOT NULL,
-    local_origem VARCHAR(50) NOT NULL,
+    ficou_sabendo_onde VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

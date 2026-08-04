@@ -8,47 +8,47 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
-@router.get("/hub-juquita", response_class=HTMLResponse)
-def form_hub_juquita(request: Request):
-    return templates.TemplateResponse(request, "hub_juquita.html", {})
+@router.get("/entrada-juquita", response_class=HTMLResponse)
+def form_entrada_juquita(request: Request):
+    return templates.TemplateResponse(request, "entrada_juquita.html", {})
 
 
-@router.post("/hub-juquita", response_class=HTMLResponse)
-def submit_hub_juquita(
+@router.post("/entrada-juquita", response_class=HTMLResponse)
+def submit_entrada_juquita(
     request: Request,
     id_public: str = Form(...),
-    composicao: str = Form(...),
+    item_ritmo: str = Form(...),
     faixa_etaria: str = Form(...),
-    local_origem: str = Form(...),
+    ficou_sabendo_onde: str = Form(...),
 ):
     visitante = db.buscar_por_id_public(id_public.strip().upper())
 
     if visitante is None:
         return templates.TemplateResponse(
-            request, "resultado_hub_juquita.html",
+            request, "resultado_entrada_juquita.html",
             {"sucesso": False, "ja_respondeu": False, "mensagem": "Código não encontrado. Confere se digitou certo."},
         )
 
-    resultado = db.registrar_hub_juquita(
+    resultado = db.registrar_entrada_juquita(
         visitante_id=visitante["id"],
-        composicao=composicao,
+        item_ritmo=item_ritmo,
         faixa_etaria=faixa_etaria,
-        local_origem=local_origem,
+        ficou_sabendo_onde=ficou_sabendo_onde,
     )
 
     if resultado == "ok":
         return templates.TemplateResponse(
-            request, "resultado_hub_juquita.html",
+            request, "resultado_entrada_juquita.html",
             {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Já pode pegar seu ecocopo ou alugar sua frota."},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(
-            request, "resultado_hub_juquita.html",
+            request, "resultado_entrada_juquita.html",
             {"sucesso": False, "ja_respondeu": True, "mensagem": "Você já passou por aqui hoje!"},
         )
     else:
         return templates.TemplateResponse(
-            request, "resultado_hub_juquita.html",
+            request, "resultado_entrada_juquita.html",
             {"sucesso": False, "ja_respondeu": False, "mensagem": "Não conseguimos registrar agora. Tenta de novo."},
             status_code=500,
         )

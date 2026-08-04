@@ -124,27 +124,27 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar pontuação: {e}")
             return "erro"
 
-    def registrar_hub_juquita(self, visitante_id: int, composicao: str, faixa_etaria: str, local_origem: str) -> str:
+    def registrar_entrada_juquita(self, visitante_id: int, item_ritmo: str, faixa_etaria: str, ficou_sabendo_onde: str) -> str:
         """Retorna 'ok', 'duplicado' ou 'erro'."""
         query = text("""
-            INSERT INTO interacoes_hub_juquita (visitante_id, composicao, faixa_etaria, local_origem)
-            VALUES (:visitante_id, :composicao, :faixa_etaria, :local_origem)
+            INSERT INTO interacoes_entrada_juquita (visitante_id, item_ritmo, faixa_etaria, ficou_sabendo_onde)
+            VALUES (:visitante_id, :item_ritmo, :faixa_etaria, :ficou_sabendo_onde)
         """)
         try:
             with self.engine.begin() as conn:
                 conn.execute(query, {
                     "visitante_id": visitante_id,
-                    "composicao": composicao,
+                    "item_ritmo": item_ritmo,
                     "faixa_etaria": faixa_etaria,
-                    "local_origem": local_origem
+                    "ficou_sabendo_onde": ficou_sabendo_onde
                 })
-            logger.info(f"Hub Juquita registrado para visitante {visitante_id}.")
+            logger.info(f"Entrada Juquita registrado para visitante {visitante_id}.")
             return "ok"
         except IntegrityError:
-            logger.warning(f"Visitante {visitante_id} já respondeu o Hub Juquita.")
+            logger.warning(f"Visitante {visitante_id} já respondeu à Entrada Juquita.")
             return "duplicado"
         except SQLAlchemyError as e:
-            logger.error(f"Erro ao registrar Hub Juquita: {e}")
+            logger.error(f"Erro ao registrar Entrada Juquita: {e}")
             return "erro"
 
     def registrar_vip_lounge(self, visitante_id: int, perfil_consumo: str, intencao_compra: str) -> str:
