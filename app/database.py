@@ -303,6 +303,30 @@ class DatabaseManager:
                     logger.error(f"Erro ao registrar Lojas: {e}")
                     return "erro"
 
+    def registrar_saida_nps(self, visitante_id: int, quanto_recomenda: int, maior_destaque: str, te_vejo_proxima_edicao: str, feedback: str) -> str:
+                    """Retorna 'ok', 'duplicado' ou 'erro'."""
+                    query = text("""
+                        INSERT INTO interacoes_saida_nps (visitante_id, quanto_recomenda, maior_destaque, te_vejo_proxima_edicao, feedback)
+                        VALUES (:visitante_id, :quanto_recomenda, :maior_destaque, :te_vejo_proxima_edicao, :feedback)
+                    """)
+                    try:
+                        with self.engine.begin() as conn:
+                            conn.execute(query, {
+                                "visitante_id": visitante_id,
+                                "quanto_recomenda": quanto_recomenda,
+                                "maior_destaque": maior_destaque,
+                                "te_vejo_proxima_edicao": te_vejo_proxima_edicao,
+                                "feedback": feedback
+                            })
+                        logger.info(f"NPS registrado para visitante {visitante_id}.")
+                        return "ok"
+                    except IntegrityError:
+                        logger.warning(f"Visitante {visitante_id} já respondeu ao NPS.")
+                        return "duplicado"
+                    except SQLAlchemyError as e:
+                        logger.error(f"Erro ao registrar NPS: {e}")
+                        return "erro"
+
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
             SELECT

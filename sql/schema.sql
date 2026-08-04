@@ -107,3 +107,13 @@ CREATE TABLE IF NOT EXISTS interacoes_dentro_lojas (
     forma_pagamento VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS interacoes_saida_nps (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    visitante_id INT NOT NULL REFERENCES users(id) UNIQUE,
+    quanto_recomenda INT NOT NULL,
+    maior_destaque VARCHAR(50) NOT NULL,
+    te_vejo_proxima_edicao VARCHAR(50) NOT NULL,
+    feedback VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
