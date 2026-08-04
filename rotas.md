@@ -16,7 +16,7 @@
                 ┌────────────┼────────────┐
                 │            │            │
                 ▼            ▼            ▼
-         /loja/{id}   /vip-lounge   /hub-juquita   /acao-guerrilha   /boas-vindas
+         /loja/{id}   /vip-lounge   /entrada-juquita   /acao-guerrilha   /boas-vindas  /cenografia  /dentro-lojas  /estacionamento  /saida-juquita  /saida-nps
                 │            │            │
                 └──────┬─────┴─────┬──────┘
                        ▼

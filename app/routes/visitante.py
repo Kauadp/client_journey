@@ -10,12 +10,12 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
-@router.get("/form/entrada", response_class=HTMLResponse)
+@router.get("/entrada", response_class=HTMLResponse)
 def form_entrada(request: Request):
     return templates.TemplateResponse(request, "entrada.html", {})
 
 
-@router.post("/form/entrada", response_class=HTMLResponse)
+@router.post("/entrada", response_class=HTMLResponse)
 def submit_entrada(
     request: Request,
     nome: str = Form(...),

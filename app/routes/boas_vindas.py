@@ -25,7 +25,7 @@ def submit_boas_vindas(
 
     if visitante is None:
         return templates.TemplateResponse(
-            request, "resultado_boas_vindas.html",
+            request, "resultado.html",
             {"sucesso": False, "ja_respondeu": False, "mensagem": "Código não encontrado. Confere se digitou certo."},
         )
 
@@ -38,17 +38,17 @@ def submit_boas_vindas(
 
     if resultado == "ok":
         return templates.TemplateResponse(
-            request, "resultado_boas_vindas.html",
+            request, "resultado.html",
             {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Mensagem Parabéns!"},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(
-            request, "resultado_boas_vindas.html",
+            request, "resultado.html",
             {"sucesso": False, "ja_respondeu": True, "mensagem": "Você já passou por aqui hoje!"},
         )
     else:
         return templates.TemplateResponse(
-            request, "resultado_boas_vindas.html",
+            request, "resultado.html",
             {"sucesso": False, "ja_respondeu": False, "mensagem": "Não conseguimos registrar agora. Tenta de novo."},
             status_code=500,
         )
