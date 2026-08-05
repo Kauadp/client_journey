@@ -88,15 +88,19 @@ def submit_resgate(request: Request, id_public: str = Form(...), brinde_id: int 
         )
 
     resultado = db.resgatar_brinde(
-        visitante_id=visitante["id"],
-        brinde_id=brinde_id,
-        custo_pontos=brinde["custo_pontos"],
-    )
+    visitante_id=visitante["id"],
+    brinde_id=brinde_id,
+    custo_pontos=brinde["custo_pontos"],
+    tipo=brinde["tipo"],
+)
 
     mensagens = {
         "ok": f"✅ {visitante['nome']} resgatou: {brinde['nome']}!",
-        "saldo_insuficiente": f"{visitante['nome']} não tem pontos suficientes pra esse brinde.",
+        "saldo_insuficiente": f"{visitante['nome']} não tem pontos suficientes.",
         "sem_estoque": f"{brinde['nome']} está sem estoque.",
+        "formularios_incompletos": f"{visitante['nome']} ainda não respondeu todos os formulários.",
+        "ja_resgatou_padrao": f"{visitante['nome']} já resgatou o brinde dele.",
+        "duplicado": f"{visitante['nome']} já resgatou esse item antes.",
         "erro": "Erro ao processar o resgate. Tenta de novo.",
     }
 

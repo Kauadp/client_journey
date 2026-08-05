@@ -47,15 +47,19 @@ CREATE TABLE IF NOT EXISTS brindes (
     nome VARCHAR(50) NOT NULL,
     custo_pontos INT NOT NULL,
     estoque INT NOT NULL,
+    tipo VARCHAR(20) NOT NULL DEFAULT 'padrao' CHECK (tipo IN ('padrao', 'ecocopo')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS um_ecocopo_so ON brindes (tipo) WHERE tipo = 'ecocopo';
 
 CREATE TABLE IF NOT EXISTS resgates (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     visitante_id INT NOT NULL REFERENCES users(id),
     brinde_id INT NOT NULL REFERENCES brindes(id),
     pontos_debitados INT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unico_visitante_brinde UNIQUE (visitante_id, brinde_id)
 );
 
 CREATE TABLE IF NOT EXISTS interacoes_acao_guerrilha (

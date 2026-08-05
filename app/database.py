@@ -15,6 +15,12 @@ class SaldoInsuficiente(Exception):
 class SemEstoque(Exception):
     pass
 
+class FormulariosIncompletos(Exception):
+    pass
+
+class JaResgatouBrindePadrao(Exception):
+    pass
+
 class DatabaseManager:
 
     def __init__(self, connection_string: str):
@@ -479,8 +485,20 @@ class DatabaseManager:
             resultado = conn.execute(query, {"id": brinde_id}).mappings().fetchone()
         return dict(resultado) if resultado else None
 
-    def resgatar_brinde(self, visitante_id: int, brinde_id: int, custo_pontos: int) -> str:
-        """Retorna 'ok', 'saldo_insuficiente', 'sem_estoque' ou 'erro'."""
+    def resgatar_brinde(self, visitante_id: int, brinde_id: int, custo_pontos: int, tipo: str) -> str:
+        """Retorna 'ok', 'saldo_insuficiente', 'sem_estoque', 'formularios_incompletos',
+        'ja_resgatou_padrao', 'duplicado' ou 'erro'."""
+
+        if tipo == "ecocopo":
+            formularios = self.buscar_formularios_respondidos(visitante_id)
+            if not all(formularios.values()):
+                return "formularios_incompletos"
+
+        query_ja_resgatou_padrao = text("""
+            SELECT 1 FROM resgates r
+            JOIN brindes b ON b.id = r.brinde_id
+            WHERE r.visitante_id = :visitante_id AND b.tipo = 'padrao'
+        """)
         query_debita_saldo = text("""
             UPDATE users SET pontos_atuais = pontos_atuais - :custo
             WHERE id = :visitante_id AND pontos_atuais >= :custo
@@ -495,18 +513,27 @@ class DatabaseManager:
             INSERT INTO resgates (visitante_id, brinde_id, pontos_debitados)
             VALUES (:visitante_id, :brinde_id, :custo)
         """)
+
         try:
             with self.engine.begin() as conn:
+                if tipo == "padrao":
+                    if conn.execute(query_ja_resgatou_padrao, {"visitante_id": visitante_id}).fetchone() is not None:
+                        raise JaResgatouBrindePadrao()
+
                 if conn.execute(query_debita_saldo, {"visitante_id": visitante_id, "custo": custo_pontos}).fetchone() is None:
                     raise SaldoInsuficiente()
                 if conn.execute(query_debita_estoque, {"brinde_id": brinde_id}).fetchone() is None:
                     raise SemEstoque()
                 conn.execute(query_log, {"visitante_id": visitante_id, "brinde_id": brinde_id, "custo": custo_pontos})
             return "ok"
+        except JaResgatouBrindePadrao:
+            return "ja_resgatou_padrao"
         except SaldoInsuficiente:
             return "saldo_insuficiente"
         except SemEstoque:
             return "sem_estoque"
+        except IntegrityError:
+            return "duplicado"
         except SQLAlchemyError as e:
             logger.error(f"Erro ao resgatar brinde: {e}")
             return "erro"
