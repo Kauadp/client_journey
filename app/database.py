@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("DatabaseManager")
 
+PONTOS_POR_FORMULARIO=10
+
 class SaldoInsuficiente(Exception):
     pass
 
@@ -124,6 +126,12 @@ class DatabaseManager:
             logger.error(f"Erro ao registrar pontuação: {e}")
             return "erro"
 
+    def _somar_pontos(self, conn, visitante_id: int, pontos: int):
+        """Soma pontos no saldo do usuário. Só funciona chamado de DENTRO de uma
+        transação já aberta (por isso recebe 'conn' pronto, não abre conexão nova)."""
+        query = text("UPDATE users SET pontos_atuais = pontos_atuais + :pontos WHERE id = :visitante_id")
+        conn.execute(query, {"visitante_id": visitante_id, "pontos": pontos})
+
     def registrar_entrada_juquita(self, visitante_id: int, item_ritmo: str, faixa_etaria: str, ficou_sabendo_onde: str) -> str:
         """Retorna 'ok', 'duplicado' ou 'erro'."""
         query = text("""
@@ -138,6 +146,7 @@ class DatabaseManager:
                     "faixa_etaria": faixa_etaria,
                     "ficou_sabendo_onde": ficou_sabendo_onde
                 })
+                self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
             logger.info(f"Entrada Juquita registrado para visitante {visitante_id}.")
             return "ok"
         except IntegrityError:
@@ -160,6 +169,7 @@ class DatabaseManager:
                         "prioridade": prioridade,
                         "quantas_sacolas": quantas_sacolas,
                     })
+                    self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                 logger.info(f"Vip Lounge registrado para visitante {visitante_id}.")
                 return "ok"
             except IntegrityError:
@@ -182,6 +192,7 @@ class DatabaseManager:
                     "oque_trouxe": oque_trouxe,
                     "regiao": regiao
                 })
+                self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
             logger.info(f"Ação Guerrilha registrada para visitante {visitante_id}.")
             return "ok"
         except IntegrityError:
@@ -205,6 +216,7 @@ class DatabaseManager:
                         "qual_foco": qual_foco,
                         "regiao": regiao
                     })
+                    self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                 logger.info(f"Boas Vindas registrada para visitante {visitante_id}.")
                 return "ok"
             except IntegrityError:
@@ -227,6 +239,7 @@ class DatabaseManager:
                             "como_veio": como_veio,
                             "quanto_tempo": quanto_tempo
                         })
+                        self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                     logger.info(f"Estacionamento registrada para visitante {visitante_id}.")
                     return "ok"
                 except IntegrityError:
@@ -249,6 +262,7 @@ class DatabaseManager:
                                 "oque_mais_garimpou": oque_mais_garimpou,
                                 "qual_marca_deixou_louco": qual_marca_deixou_louco
                             })
+                            self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                         logger.info(f"Cenografia registrada para visitante {visitante_id}.")
                         return "ok"
                     except IntegrityError:
@@ -272,6 +286,7 @@ class DatabaseManager:
                         "quanto_pretende_gastar": quanto_pretende_gastar,
                         "com_quem_veio": com_quem_veio
                     })
+                    self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                 logger.info(f"Saída Juquita registrado para visitante {visitante_id}.")
                 return "ok"
             except IntegrityError:
@@ -294,6 +309,7 @@ class DatabaseManager:
                             "melhor_dia": melhor_dia,
                             "forma_pagamento": forma_pagamento
                         })
+                        self._somar_pontos(conn, visitante_id, PONTOS_POR_FORMULARIO)
                     logger.info(f"Lojas registrado para visitante {visitante_id}.")
                     return "ok"
                 except IntegrityError:
@@ -326,6 +342,33 @@ class DatabaseManager:
                     except SQLAlchemyError as e:
                         logger.error(f"Erro ao registrar NPS: {e}")
                         return "erro"
+
+    def buscar_formularios_respondidos(self, visitante_id: int) -> dict[str, bool]:
+        query = text("""
+            SELECT
+                EXISTS(SELECT 1 FROM interacoes_lounge_vip WHERE visitante_id = :id) AS lounge_vip,
+                EXISTS(SELECT 1 FROM interacoes_entrada_juquita WHERE visitante_id = :id) AS entrada_juquita,
+                EXISTS(SELECT 1 FROM interacoes_acao_guerrilha WHERE visitante_id = :id) AS acao_guerrilha,
+                EXISTS(SELECT 1 FROM interacoes_boas_vindas WHERE visitante_id = :id) AS boas_vindas,
+                EXISTS(SELECT 1 FROM interacoes_cenografia WHERE visitante_id = :id) AS cenografia,
+                EXISTS(SELECT 1 FROM interacoes_dentro_lojas WHERE visitante_id = :id) AS dentro_lojas,
+                EXISTS(SELECT 1 FROM interacoes_estacionamento WHERE visitante_id = :id) AS estacionamento,
+                EXISTS(SELECT 1 FROM interacoes_saida_juquita WHERE visitante_id = :id) AS saida_juquita,
+                EXISTS(SELECT 1 FROM interacoes_saida_nps WHERE visitante_id = :id) AS saida_nps
+        """)
+        with self.engine.connect() as conn:
+            resultado = conn.execute(query, {"id": visitante_id}).mappings().fetchone()
+        return {
+            "Entrada Juquita": resultado["entrada_juquita"],
+            "Lounge VIP": resultado["lounge_vip"],
+            "Acao Guerrilha": resultado["acao_guerrilha"],
+            "Boas Vindas": resultado["boas_vindas"],
+            "Cenografia": resultado["cenografia"],
+            "Dentro Lojas": resultado["dentro_lojas"],
+            "Estacionamento": resultado["estacionamento"],
+            "Saida Juquita": resultado["saida_juquita"],
+            "NPS": resultado["saida_nps"]
+        }
 
     def buscar_resumo_pontuacao_usuario(self, id_public: str) -> dict | None:
         query_usuario = text("""
@@ -383,6 +426,8 @@ class DatabaseManager:
                 {"id_public": id_public}
             ).mappings().fetchall()
 
+        formularios = self.buscar_formularios_respondidos(usuario["id"])
+
         return {
             "usuario_id": usuario["id"],
             "usuario_nome": usuario["nome"],
@@ -401,6 +446,7 @@ class DatabaseManager:
                 }
                 for resgate in resgates
             ],
+            "formularios": formularios
         }
 
     def inserir_brinde(self, nome: str, custo_pontos: int, estoque: int) -> dict | None:

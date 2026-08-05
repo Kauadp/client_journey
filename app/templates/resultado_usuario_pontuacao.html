@@ -41,6 +41,22 @@
 </p>
 {% endif %}
 
+{% if usuario.formularios %}
+<h6 class="fw-bold mb-2">📝 Formulários</h6>
+<ul class="list-group mb-4">
+    {% for nome, respondido in usuario.formularios.items() %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ nome }}
+        {% if respondido %}
+        <span class="text-success">✅ Respondido</span>
+        {% else %}
+        <span class="text-muted">⬜ Pendente</span>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <a href="/usuario-pontuacao" class="btn btn-outline-primary w-100">
     Nova consulta
 </a>
@@ -54,4 +70,4 @@
 </a>
 {% endif %}
 {% endblock %}
-```
+

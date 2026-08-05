@@ -8,7 +8,7 @@ load_dotenv()
 
 app = FastAPI(title="Ecossistema de Dados Exagerado")
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_create_key"))
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_create_key"), max_age=3600)
 
 app.include_router(visitante.router)
 app.include_router(loja.router)
