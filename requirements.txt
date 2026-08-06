@@ -8,3 +8,4 @@ resend
 jinja2
 python-multipart
 itsdangerous
+requests

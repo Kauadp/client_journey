@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.database import db
 from app.services.public_code import gerar_public_code_unico
-from app.services.email_service import enviar_email_passaporte
+from app.services.email_service import enviar_email_confirmacao
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -35,7 +35,7 @@ def submit_entrada(
             email=email,
             id_public=id_public,
         )
-        enviar_email_passaporte(
+        enviar_email_confirmacao(
             nome=nome,
             email=email,
             id_public=id_public
