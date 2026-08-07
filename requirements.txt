@@ -2,10 +2,11 @@ pandas
 numpy
 sqlalchemy
 python-dotenv
-psycopg2
+psycopg2-binary
 fastapi
 resend
 jinja2
 python-multipart
 itsdangerous
 requests
+uvicorn[standard]
