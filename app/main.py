@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from app.routes import entrada_juquita, visitante, loja, vip_lounge, admin, usuario_pontuacao, auth, acao_guerrilha, boas_vindas, estacionamento, cenografia, saida_juquita, dentro_lojas, saida_nps
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI(title="Ecossistema de Dados Exagerado")
-
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_create_key"), max_age=3600)
 
 app.include_router(visitante.router)

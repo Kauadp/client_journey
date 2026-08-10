@@ -2,12 +2,11 @@ import os
 import secrets
 from fastapi import APIRouter, Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from app.templates_global import templates
 from dotenv import load_dotenv
 from app.dependencies import verificar_admin
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 load_dotenv()
 

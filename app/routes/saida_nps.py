@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+from app.templates_global import templates
 from typing import Optional
 
 from app.database import db
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/saida-nps", response_class=HTMLResponse)

@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 from app.database import db
 from app.services.public_code import gerar_public_code_unico
 from app.services.email_service import enviar_email_confirmacao
+from app.templates_global import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/entrada", response_class=HTMLResponse)

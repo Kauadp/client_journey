@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
 from app.database import db
+from app.templates_global import templates
 
 router = APIRouter()
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/boas-vindas", response_class=HTMLResponse)
