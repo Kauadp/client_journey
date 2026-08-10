@@ -4,12 +4,17 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
-
+from fastapi.responses import RedirectResponse
 load_dotenv()
 
 app = FastAPI(title="Ecossistema de Dados Exagerado")
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_create_key"), max_age=3600)
+
+@app.get("/")
+def redirect_to_entrada():
+    return RedirectResponse(url="/entrada")
 
 app.include_router(visitante.router)
 app.include_router(loja.router)
