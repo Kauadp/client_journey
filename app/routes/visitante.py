@@ -20,7 +20,16 @@ def submit_entrada(
     nome: str = Form(...),
     telefone: str = Form(...),
     email: str = Form(...),
+    aceite_termos: bool = Form(False),
 ):
+    if not aceite_termos:
+        return templates.TemplateResponse(
+            request,
+            "erro.html",
+            {"mensagem": "Você precisa aceitar os Termos e Serviços para continuar."},
+            status_code=400,
+        )
+
     telefone_normalizado = "".join(filter(str.isdigit, telefone))
 
     usuario_tel = db.buscar_por_telefone(telefone_normalizado)

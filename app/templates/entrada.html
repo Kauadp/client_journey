@@ -22,6 +22,36 @@
         <input type="email" class="form-control" name="email" required>
     </div>
 
+    <!-- CHECKBOX DE TERMOS DO BOOTSTRAP -->
+    <div class="mb-3 form-check text-start">
+        <input type="checkbox" class="form-check-input" id="aceiteTermos" name="aceite_termos" value="true" required>
+        <label class="form-check-label small" for="aceiteTermos">
+            Li e aceito os 
+            <a href="#" data-bs-toggle="modal" data-bs-target="#modalTermos">Termos e Serviços</a>.
+        </label>
+    </div>
+
     <button type="submit" class="btn btn-primary w-100">Quero meu Passaporte</button>
 </form>
+
+<!-- MODAL COM TEXTO DOS TERMOS -->
+<div class="modal fade" id="modalTermos" tabindex="-1" aria-labelledby="modalTermosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTermosLabel">Termos e Serviços</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-start small">
+                <h6>1. Uso dos Dados</h6>
+                <p>Os dados fornecidos serão utilizados para identificação no evento, acúmulo de pontos e resgate de benefícios do Exagerado.</p>
+                <h6>2. Regras de Pontuação</h6>
+                <p>Os pontos e resgates são individuais e restritos ao período do evento.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Entendi</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
