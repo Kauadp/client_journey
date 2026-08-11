@@ -41,7 +41,7 @@ def submit_saida_nps(
     if resultado == "ok":
         return templates.TemplateResponse(
             request, "resultado.html",
-            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Mensagem Parabéns!"},
+            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Sua resposta foi registrada."},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(

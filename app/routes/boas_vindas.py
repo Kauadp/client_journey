@@ -38,7 +38,7 @@ def submit_boas_vindas(
     if resultado == "ok":
         return templates.TemplateResponse(
             request, "resultado.html",
-            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Mensagem Parabéns!"},
+            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Sua mensagem foi registrada."},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(

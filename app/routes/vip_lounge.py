@@ -36,7 +36,7 @@ def submit_vip_lounge(
     if resultado == "ok":
         return templates.TemplateResponse(
             request, "resultado.html",
-            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Tenha um bom descanso."},
+            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Sua resposta foi registrada."},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(

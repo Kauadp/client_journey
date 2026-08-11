@@ -38,7 +38,7 @@ def submit_saida_juquita(
     if resultado == "ok":
         return templates.TemplateResponse(
             request, "resultado.html",
-            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Já pode pegar seu ecocopo ou alugar sua frota."},
+            {"sucesso": True, "ja_respondeu": False, "mensagem": f"Valeu, {visitante['nome']}! Sua resposta foi registrada."},
         )
     elif resultado == "duplicado":
         return templates.TemplateResponse(
