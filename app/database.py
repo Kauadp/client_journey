@@ -454,10 +454,10 @@ class DatabaseManager:
             "formularios": formularios
         }
 
-    def inserir_brinde(self, nome: str, custo_pontos: int, estoque: int) -> dict | None:
+    def inserir_brinde(self, nome: str, custo_pontos: int, estoque: int, tipo: str) -> dict | None:
         query = text("""
-            INSERT INTO brindes (nome, custo_pontos, estoque)
-            VALUES (:nome, :custo_pontos, :estoque)
+            INSERT INTO brindes (nome, custo_pontos, estoque, tipo)
+            VALUES (:nome, :custo_pontos, :estoque, :tipo)
             RETURNING *
         """)
         try:
@@ -466,6 +466,7 @@ class DatabaseManager:
                     "nome": nome,
                     "custo_pontos": custo_pontos,
                     "estoque": estoque,
+                    "tipo": tipo
                 }).mappings().fetchone()
             return dict(resultado)
         except SQLAlchemyError as e:
@@ -488,7 +489,7 @@ class DatabaseManager:
         """Retorna 'ok', 'saldo_insuficiente', 'sem_estoque', 'formularios_incompletos',
         'ja_resgatou_padrao', 'duplicado' ou 'erro'."""
 
-        if tipo == "ecocopo":
+        if tipo == "gratis":
             formularios = self.buscar_formularios_respondidos(visitante_id)
             if not all(formularios.values()):
                 return "formularios_incompletos"

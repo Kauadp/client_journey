@@ -49,8 +49,9 @@ def submit_novo_brinde(
     nome: str = Form(...),
     custo_pontos: int = Form(...),
     estoque: int = Form(...),
+    tipo: str = Form(...),
 ):
-    brinde = db.inserir_brinde(nome=nome, custo_pontos=custo_pontos, estoque=estoque)
+    brinde = db.inserir_brinde(nome=nome, custo_pontos=custo_pontos, estoque=estoque, tipo=tipo)
 
     if brinde is None:
         return templates.TemplateResponse(
