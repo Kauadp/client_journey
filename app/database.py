@@ -54,17 +54,17 @@ class DatabaseManager:
             resultado = conn.execute(query, {"email": email}).mappings().fetchone()
         return dict(resultado) if resultado else None
 
-    def inserir_usuario(self, nome: str, numero_cel: str, email: str, id_public: str) -> dict | None:
+    def inserir_usuario(self, nome: str, numero_cel: str, email: str, id_public: str, aceite_marketing: bool) -> dict | None:
         query = text("""
-            INSERT INTO users (nome, numero_cel, email, id_public)
-            VALUES (:nome, :numero_cel, :email, :id_public)
+            INSERT INTO users (nome, numero_cel, email, id_public, aceite_marketing)
+            VALUES (:nome, :numero_cel, :email, :id_public, :aceite_marketing)
             RETURNING *
         """)
         try:
             with self.engine.begin() as conn:
                 resultado = conn.execute(
                     query,
-                    {"nome": nome, "numero_cel": numero_cel, "email": email, "id_public": id_public},
+                    {"nome": nome, "numero_cel": numero_cel, "email": email, "id_public": id_public, "aceite_marketing": aceite_marketing},
                 ).mappings().fetchone()
             logger.info(f"Usuário {id_public} inserido com sucesso.")
             return dict(resultado)

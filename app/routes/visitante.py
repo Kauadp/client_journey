@@ -21,6 +21,7 @@ def submit_entrada(
     telefone: str = Form(...),
     email: str = Form(...),
     aceite_termos: bool = Form(False),
+    aceite_marketing: bool = Form(False),
 ):
     if not aceite_termos:
         return templates.TemplateResponse(
@@ -42,11 +43,7 @@ def submit_entrada(
             numero_cel=telefone_normalizado,
             email=email,
             id_public=id_public,
-        )
-        enviar_email_confirmacao(
-            nome=nome,
-            email=email,
-            id_public=id_public
+            aceite_marketing=aceite_marketing
         )
 
         if usuario is None:
@@ -56,6 +53,11 @@ def submit_entrada(
                 {"mensagem": "Não conseguimos concluir seu cadastro. Tenta de novo em instantes."},
                 status_code=500,
             )
+        enviar_email_confirmacao(
+            nome=nome,
+            email=email,
+            id_public=id_public
+        )
 
     else:
         return templates.TemplateResponse(
